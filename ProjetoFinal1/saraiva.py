@@ -10,7 +10,6 @@ def get_http(url, nome_livro):
     except (requests.exceptions.HTTPError, requests.exceptions.RequestException,
             requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             print(str(e))
-            pass
     except Exception as e:
         raise 
 
@@ -20,9 +19,30 @@ def get_produto(content):
 
     lista_produtos = []
     for produto in produtos:
-        info_produto = [produto.a.get('href'), produto.a.get('title')]
+        info_produto = [f'https:{produto.a.get("href")}', produto.a.get('title')]
         lista_produtos.append(info_produto)
     return(lista_produtos)
+
+
+def get_http_page_produto(lista_produtos):
+    for produto in lista_produtos:
+        print(produto)
+        try: 
+            r = requests.get(produto[0])
+        except (requests.exceptions.HTTPError, requests.exceptions.RequestException,
+            requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            print(str(e))
+            r = None
+        except Exception as e:
+            raise 
+        
+        parse_page_produto(r.text, produto[0], produto[1])
+        break
+
+def parse_page_produto(content, url_produto, titulo):
+    soup = BeautifulSoup(content, 'lxml')
+    with open('result.html', 'w', encoding='utf8') as f:
+        f.write(content)
 
 
 if __name__ == '__main__':
@@ -32,7 +52,7 @@ if __name__ == '__main__':
     r = get_http(url, nome)
     if r: 
         lista_produtos = get_produto(r.text)
-        print(lista_produtos)
+        get_http_page_produto(lista_produtos)
 
 
 
